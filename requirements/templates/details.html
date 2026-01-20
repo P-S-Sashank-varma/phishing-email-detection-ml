@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Details - PhishGuard{% endblock %}
+
+{% block content %}
+<div class="details-container">
+    <h2>📚 Understanding Phishing</h2>
+    
+    <div class="details-section">
+        <h3>What is Phishing?</h3>
+        <p>Phishing is a type of cyber attack where fraudsters attempt to trick you into revealing sensitive information like passwords, credit card numbers, or personal details. They typically do this through deceptive emails that appear to come from legitimate sources.</p>
+    </div>
+
+    <div class="details-section">
+        <h3>Common Phishing Tactics</h3>
+        <ul class="feature-list">
+            <li>🎯 Urgent requests for action or verification</li>
+            <li>🔗 Suspicious links or attachments</li>
+            <li>🏦 Impersonation of banks or trusted companies</li>
+            <li>⚠️ Threats of account closure or legal action</li>
+            <li>💰 Offers that seem too good to be true</li>
+            <li>📝 Requests for personal or financial information</li>
+        </ul>
+    </div>
+
+    <div class="details-section">
+        <h3>How to Protect Yourself</h3>
+        <ul class="feature-list">
+            <li>✅ Always verify the sender's email address carefully</li>
+            <li>✅ Hover over links to see the actual URL</li>
+            <li>✅ Never click links in suspicious emails</li>
+            <li>✅ Use strong, unique passwords</li>
+            <li>✅ Enable two-factor authentication</li>
+            <li>✅ Keep your software and browser updated</li>
+        </ul>
+    </div>
+
+    <div class="details-section">
+        <h3>Our Technology</h3>
+        <p>PhishGuard uses advanced machine learning algorithms (Random Forest Classifier) trained on thousands of emails to identify phishing attempts with 91% accuracy. Our system analyzes email content, structure, and patterns to provide you with reliable security assessments.</p>
+    </div>
+</div>
+{% endblock %}

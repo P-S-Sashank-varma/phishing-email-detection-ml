@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard - Email Security Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #0f172a;
+            --accent-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --text-light: #f3f4f6;
+            --text-dark: #111827;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: var(--secondary-color);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.3s;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Auth Pages (Login/Signup) */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 100px);
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-card h2 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #dc2626;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .auth-switch a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .welcome-message {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(30, 58, 138, 0.3);
+        }
+
+        .feature-card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Predict Page */
+        .predict-container {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .predict-container h2 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .predict-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 200px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .predict-button {
+            background: var(--accent-color);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .predict-button:hover {
+            background: #dc2626;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .predict-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        /* Result Display */
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .result-container.phishing {
+            background: #fee2e2;
+            border: 2px solid var(--accent-color);
+        }
+
+        .result-container.legitimate {
+            background: #dcfce7;
+            border: 2px solid var(--success-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-icon {
+            font-size: 2rem;
+        }
+
+        .result-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .result-container.phishing .result-text {
+            color: var(--accent-color);
+        }
+
+        .result-container.legitimate .result-text {
+            color: var(--success-color);
+        }
+
+        .result-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Details Page */
+        .details-container {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .details-container h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .details-section {
+            margin-bottom: 2rem;
+        }
+
+        .details-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .details-section p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f9fafb;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            color: #666;
+        }
+
+        /* Contact Page */
+        .contact-container {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-container h2 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .contact-item-icon {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            min-width: 30px;
+        }
+
+        .contact-item-content h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-item-content p {
+            color: #666;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .message-box {
+            padding: 1rem;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .message-box.success {
+            background: #dcfce7;
+            color: var(--success-color);
+            border: 2px solid var(--success-color);
+        }
+
+        .message-box.error {
+            background: #fee2e2;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .auth-card {
+                padding: 2rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo" onclick="showPage('home', event)">
+                <span class="logo-icon">🛡️</span>
+                <span>PhishGuard</span>
+            </div>
+            <ul class="nav-links">
+                <li><a onclick="showPage('home', event)" class="nav-link">Home</a></li>
+                <li><a onclick="showPage('predict', event)" class="nav-link">Predict</a></li>
+                <li><a onclick="showPage('details', event)" class="nav-link">Details</a></li>
+                <li><a onclick="showPage('contact', event)" class="nav-link">Contact</a></li>
+                <li><a onclick="logout()" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Login Page -->
+        <div id="login" class="page active">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2>Login</h2>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required placeholder="Enter your password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <div class="auth-switch">
+                            Don't have an account? <a onclick="showPage('signup', event)">Sign Up</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Page -->
+        <div id="signup" class="page">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2>Sign Up</h2>
+                    <form onsubmit="handleSignup(event)">
+                        <div class="form-group">
+                            <label for="signup-name">Full Name</label>
+                            <input type="text" id="signup-name" required placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required placeholder="Create a password">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-confirm">Confirm Password</label>
+                            <input type="password" id="signup-confirm" required placeholder="Confirm your password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                        <div class="auth-switch">
+                            Already have an account? <a onclick="showPage('login', event)">Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home/Dashboard Page -->
+        <div id="home" class="page">
+            <div class="dashboard">
+                <h2>Welcome to PhishGuard</h2>
+                <p class="welcome-message">Your trusted email security detection system. Protect yourself from phishing attacks with advanced machine learning technology.</p>
+                
+                <div class="dashboard-grid">
+                    <div class="feature-card" onclick="showPage('predict', event)">
+                        <div class="feature-card-icon">🔍</div>
+                        <h3>Scan Email</h3>
+                        <p>Check if an email is phishing or legitimate</p>
+                    </div>
+                    <div class="feature-card" onclick="showPage('details', event)">
+                        <div class="feature-card-icon">📚</div>
+                        <h3>Learn More</h3>
+                        <p>Understand phishing and how to stay safe</p>
+                    </div>
+                    <div class="feature-card" onclick="showPage('contact', event)">
+                        <div class="feature-card-icon">📧</div>
+                        <h3>Contact Us</h3>
+                        <p>Get in touch with our support team</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predict Page -->
+        <div id="predict" class="page">
+            <div class="predict-container">
+                <h2>🔐 Email Security Scanner</h2>
+                <form class="predict-form" onsubmit="handlePredict(event)">
+                    <div class="form-group">
+                        <label for="email-content">Paste Email Content Here:</label>
+                        <textarea id="email-content" placeholder="Paste the email content you want to check..." required></textarea>
+                    </div>
+                    <button type="submit" class="predict-button">Scan Email</button>
+                </form>
+
+                <div id="result" class="result-container">
+                    <div class="result-header">
+                        <span class="result-icon" id="result-icon"></span>
+                        <span class="result-text" id="result-text"></span>
+                    </div>
+                    <div class="result-description" id="result-description"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Page -->
+        <div id="details" class="page">
+            <div class="details-container">
+                <h2>📚 Understanding Phishing</h2>
+                
+                <div class="details-section">
+                    <h3>What is Phishing?</h3>
+                    <p>Phishing is a type of cyber attack where fraudsters attempt to trick you into revealing sensitive information like passwords, credit card numbers, or personal details. They typically do this through deceptive emails that appear to come from legitimate sources.</p>
+                </div>
+
+                <div class="details-section">
+                    <h3>Common Phishing Tactics</h3>
+                    <ul class="feature-list">
+                        <li>🎯 Urgent requests for action or verification</li>
+                        <li>🔗 Suspicious links or attachments</li>
+                        <li>🏦 Impersonation of banks or trusted companies</li>
+                        <li>⚠️ Threats of account closure or legal action</li>
+                        <li>💰 Offers that seem too good to be true</li>
+                        <li>📝 Requests for personal or financial information</li>
+                    </ul>
+                </div>
+
+                <div class="details-section">
+                    <h3>How to Protect Yourself</h3>
+                    <ul class="feature-list">
+                        <li>✅ Always verify the sender's email address carefully</li>
+                        <li>✅ Hover over links to see the actual URL</li>
+                        <li>✅ Never click links in suspicious emails</li>
+                        <li>✅ Use strong, unique passwords</li>
+                        <li>✅ Enable two-factor authentication</li>
+                        <li>✅ Keep your software and browser updated</li>
+                    </ul>
+                </div>
+
+                <div class="details-section">
+                    <h3>Our Technology</h3>
+                    <p>PhishGuard uses advanced machine learning algorithms trained on thousands of emails to identify phishing attempts with high accuracy. Our system analyzes email content, structure, and patterns to provide you with reliable security assessments.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div id="contact" class="page">
+            <div class="contact-container">
+                <h2>📞 Get In Touch</h2>
+                
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Contact Information</h3>
+                        
+                        <div class="contact-item">
+                            <div class="contact-item-icon">📧</div>
+                            <div class="contact-item-content">
+                                <h4>Email</h4>
+                                <p>support@phishguard.com</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <div class="contact-item-icon">📱</div>
+                            <div class="contact-item-content">
+                                <h4>Phone</h4>
+                                <p>+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <div class="contact-item-icon">📍</div>
+                            <div class="contact-item-content">
+                                <h4>Address</h4>
+                                <p>123 Security Ave, Tech City, TC 12345</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <div class="contact-item-icon">🕐</div>
+                            <div class="contact-item-content">
+                                <h4>Support Hours</h4>
+                                <p>Monday - Friday, 9:00 AM - 6:00 PM EST</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-form">
+                        <h3>Send us a Message</h3>
+                        <form onsubmit="handleContactForm(event)">
+                            <input type="text" placeholder="Your Name" required>
+                            <input type="email" placeholder="Your Email" required>
+                            <input type="text" placeholder="Subject" required>
+                            <textarea placeholder="Your Message" required></textarea>
+                            <button type="submit" class="btn btn-secondary">Send Message</button>
+                        </form>
+                        <div id="contact-message" class="message-box"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Page Navigation
+        function showPage(pageId, event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Show selected page
+            const page = document.getElementById(pageId);
+            if (page) {
+                page.classList.add('active');
+            }
+
+            // Add active class to clicked nav link
+            if (event && event.target.classList.contains('nav-link')) {
+                event.target.classList.add('active');
+            }
+        }
+
+        // Login Handler
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Simple validation
+            if (email && password) {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', email);
+                showPage('home', null);
+                alert('Login successful! Welcome to PhishGuard.');
+            }
+        }
+
+        // Signup Handler
+        function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+
+            if (password !== confirm) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', name);
+            showPage('home', null);
+            alert('Sign up successful! Welcome to PhishGuard.');
+        }
+
+        // Logout Handler
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            showPage('login', null);
+            alert('You have been logged out.');
+        }
+
+        // Predict Handler
+        async function handlePredict(event) {
+            event.preventDefault();
+            const emailContent = document.getElementById('email-content').value;
+            const resultContainer = document.getElementById('result');
+
+            if (!emailContent.trim()) {
+                alert('Please enter email content');
+                return;
+            }
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: emailContent
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                const prediction = data.prediction.toLowerCase();
+
+                // Display result
+                resultContainer.classList.remove('phishing', 'legitimate');
+                
+                if (prediction === 'phishing') {
+                    resultContainer.classList.add('phishing');
+                    document.getElementById('result-icon').textContent = '⚠️';
+                    document.getElementById('result-text').textContent = 'PHISHING DETECTED';
+                    document.getElementById('result-description').innerHTML = `
+                        <strong>This email appears to be a phishing attempt.</strong><br><br>
+                        This email contains characteristics commonly found in phishing attacks. 
+                        Be cautious and:<br>
+                        • Do not click any links<br>
+                        • Do not download attachments<br>
+                        • Do not reply with personal information<br>
+                        • Report it to your email provider
+                    `;
+                } else {
+                    resultContainer.classList.add('legitimate');
+                    document.getElementById('result-icon').textContent = '✅';
+                    document.getElementById('result-text').textContent = 'LEGITIMATE EMAIL';
+                    document.getElementById('result-description').innerHTML = `
+                        <strong>This email appears to be legitimate.</strong><br><br>
+                        Our analysis suggests this email is safe. However, always remain cautious and 
+                        verify any requests through official channels before providing sensitive information.
+                    `;
+                }
+
+                resultContainer.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to the server. Please try again.');
+            }
+        }
+
+        // Contact Form Handler
+        function handleContactForm(event) {
+            event.preventDefault();
+            const messageBox = document.getElementById('contact-message');
+            
+            messageBox.textContent = 'Thank you! Your message has been sent. We will get back to you soon.';
+            messageBox.classList.remove('error');
+            messageBox.classList.add('success');
+            messageBox.style.display = 'block';
+
+            event.target.reset();
+
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Check if user is logged in on page load
+        window.addEventListener('load', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn) {
+                showPage('home', null);
+            } else {
+                showPage('login', null);
+            }
+        });
+    </script>
+</body>
+</html>

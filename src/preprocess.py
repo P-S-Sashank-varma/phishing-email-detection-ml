@@ -10,8 +10,18 @@ def preprocess_data(input_file, output_file):
     if 'text' not in data.columns or 'label' not in data.columns:
         raise ValueError("Input CSV must have 'text' and 'label' columns.")
 
-    # Vectorize the text using TF-IDF
-    vectorizer = TfidfVectorizer()
+    print(f"Total samples loaded: {len(data)}")
+    print(f"Phishing samples: {(data['label'] == 1).sum()}")
+    print(f"Legitimate samples: {(data['label'] == 0).sum()}")
+
+    # Vectorize the text using TF-IDF with improved parameters
+    vectorizer = TfidfVectorizer(
+        max_features=1000,  # Limit to top 1000 features
+        min_df=1,           # Minimum document frequency
+        max_df=0.8,         # Maximum document frequency
+        ngram_range=(1, 2), # Use unigrams and bigrams
+        stop_words='english'
+    )
     X = vectorizer.fit_transform(data['text']).toarray()
 
     # Extract labels
@@ -22,6 +32,7 @@ def preprocess_data(input_file, output_file):
         pickle.dump((X, y, vectorizer), f)
 
     print(f"Preprocessed data saved to {output_file}")
+    print(f"Feature vector shape: {X.shape}")
 
 if __name__ == "__main__":
-    preprocess_data("data/phishing_emails.csv", "data/preprocessed_data.pkl")
+    preprocess_data("data/phishing_emails_expanded.csv", "data/preprocessed_data.pkl")

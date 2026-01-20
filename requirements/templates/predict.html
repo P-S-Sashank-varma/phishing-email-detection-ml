@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Predict - PhishGuard{% endblock %}
+
+{% block content %}
+<div class="predict-container">
+    <h2>🔐 Email Security Scanner</h2>
+    <form class="predict-form" onsubmit="handlePredict(event)">
+        <div class="form-group">
+            <label for="email-content">Paste Email Content Here:</label>
+            <textarea id="email-content" placeholder="Paste the email content you want to check..." required></textarea>
+        </div>
+        <button type="submit" class="predict-button">Scan Email</button>
+    </form>
+
+    <div id="result" class="result-container">
+        <div class="result-header">
+            <span class="result-icon" id="result-icon"></span>
+            <span class="result-text" id="result-text"></span>
+        </div>
+        <div class="result-description" id="result-description"></div>
+    </div>
+</div>
+{% endblock %}

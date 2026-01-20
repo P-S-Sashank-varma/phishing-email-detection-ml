@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Home - PhishGuard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Welcome to PhishGuard</h2>
+    <p class="welcome-message">Your trusted email security detection system. Protect yourself from phishing attacks with advanced machine learning technology.</p>
+    
+    <div class="dashboard-grid">
+        <a href="/predict" class="feature-card">
+            <div class="feature-card-icon">🔍</div>
+            <h3>Scan Email</h3>
+            <p>Check if an email is phishing or legitimate</p>
+        </a>
+        <a href="/details" class="feature-card">
+            <div class="feature-card-icon">📚</div>
+            <h3>Learn More</h3>
+            <p>Understand phishing and how to stay safe</p>
+        </a>
+        <a href="/contact" class="feature-card">
+            <div class="feature-card-icon">📧</div>
+            <h3>Contact Us</h3>
+            <p>Get in touch with our support team</p>
+        </a>
+    </div>
+</div>
+{% endblock %}
